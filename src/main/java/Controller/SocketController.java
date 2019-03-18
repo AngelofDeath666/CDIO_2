@@ -30,14 +30,11 @@ public class SocketController {
         }
     }
 
-    public void getWeight() throws IOException {
-        sendLine("S");
+    public int getOperatorID() throws IOException {
+        sendLine("RM20 8 Indtast operator ID ”” ”&3”");
         System.out.println(reader.readLine());
-    }
-
-    public void writeOnWeight(String text) throws IOException {
-        sendLine("D " + text);
-        reader.readLine();
+        String userID = reader.readLine().split("\"")[ 1 ].split("\"")[ 0 ];
+        return Integer.parseInt(userID);
     }
 
 }
