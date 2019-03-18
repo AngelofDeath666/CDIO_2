@@ -15,10 +15,10 @@ public class Main {
         sc.connectToServer("127.0.0.1",8000);
         Scanner s = new Scanner(System.in);
         while(true) {
-            int userID = sc.getUserSelection("Indtast_operatør_ID:");
+            int userID = sc.getUserSelectionWithReturn("Indtast_operatør_ID:");
             if (userID == 12) {
-                if (sc.getUserSelection(userName + "?")==1) operatorConfirmed(sc);
-                else sc.displayOnWeight("Prøv_igen");
+                sc.getUserSelection(userName + "?");
+                operatorConfirmed(sc);
             }
             else {
                 sc.displayOnWeight("Ukendt_operatør");
@@ -28,7 +28,7 @@ public class Main {
     }
 
     public void operatorConfirmed(SocketController sc) throws IOException {
-        int batchNumber = sc.getUserSelection("Indtast_batch_nummer:");
+        int batchNumber = sc.getUserSelectionWithReturn("Indtast_batch_nummer:");
         sc.getUserSelection("Ubelast_vægt");
         sc.resetWeight();
         sc.getUserSelection("Placer_tara");

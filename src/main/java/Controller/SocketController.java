@@ -31,8 +31,8 @@ public class SocketController {
         }
     }
 
-    public int getUserSelection(String text) throws IOException {
-        sendLine("RM20 8 "+text+" ”” ”&3”");
+    public int getUserSelectionWithReturn(String text) throws IOException {
+        sendLine("RM20 8 "+text+" ”” &3");
         System.out.println(reader.readLine());
         String response = reader.readLine();
         System.out.println(response);
@@ -40,6 +40,12 @@ public class SocketController {
         System.out.println(userID);
         waitTimer(1);
         return userID;
+    }
+    public void getUserSelection(String text) throws IOException {
+        sendLine("RM20 8 "+text+" ”” &3");
+        System.out.println(reader.readLine());
+        String response = reader.readLine();
+        System.out.println(response);
     }
 
     public void displayOnWeight(String text) throws IOException {
