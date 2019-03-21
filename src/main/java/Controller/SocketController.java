@@ -2,6 +2,7 @@ package Controller;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 public class SocketController {
@@ -18,7 +19,7 @@ public class SocketController {
         writer = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
     }
 
-    private void sendLine(String line) throws IOException {
+    public void sendLine(String line) throws IOException {
         if (clientSocket == null) {
             throw new IOException("No socket connection found, please connect first+");
         }
@@ -31,29 +32,53 @@ public class SocketController {
         }
     }
 
-    public int getUserSelectionWithReturn(String text) throws IOException {
-        sendLine("RM20 8 "+text+" ”” &3");
+    public int getUserSelectionWithIntReturn(String text) throws IOException {
+        sendLine("RM20 8 \""+text+"\" \"\" \"&3\"");
         System.out.println(reader.readLine());
         String response = reader.readLine();
+        System.out.println(response);
+        if (response.length()==9) return 0;
         System.out.println(response);
         int userID = Integer.parseInt(response.split("\"")[1].split("\"")[0]);
         System.out.println(userID);
         waitTimer(1);
         return userID;
     }
-    public void getUserSelection(String text) throws IOException {
-        sendLine("RM20 8 "+text+" ”” &3");
+    public String getUserSelectionWithStringReturn(String text) throws IOException {
+        sendLine("RM20 8 \""+text+"\" \"\" \"&3\"");
         System.out.println(reader.readLine());
         String response = reader.readLine();
+        if (response.length()==9) return "Nej";
         System.out.println(response);
+        String selection = response.split("\"")[1].split("\"")[0];
+        return selection;
+    }
+    public void getUserSelectionWithoutReturn(String text) throws IOException {
+        sendLine("RM20 8 \""+text+"\" \"\" \"&3\"");
+        System.out.println(reader.readLine());
+        System.out.println(reader.readLine());
     }
 
-    public void displayOnWeight(String text) throws IOException {
-        sendLine("P111 " + text);
+    public double getUserSelectionDouble(String text) throws IOException {
+        sendLine("RM20 8 \""+text+"\" \"\" \"&3\"");
         System.out.println(reader.readLine());
-        waitTimer(2);
-        sendLine("DW");
         System.out.println(reader.readLine());
+        waitTimer(1);
+        sendLine("S");
+        char[] responseArray = reader.readLine().toCharArray();
+        ArrayList list = new ArrayList();
+        for (int i = 0; i < responseArray.length; i++) {
+            if (isThisAnInt(responseArray[i]) || responseArray[i] == '.') {
+                list.add(responseArray[i]);
+            }
+        }
+        String responseString = "";
+        for (int j = 0; j < list.size(); j++) {
+            responseString = responseString + list.get(j);
+        }
+        System.out.println(responseString);
+        return Double.parseDouble(responseString);
+
     }
 
     public void waitTimer(int seconds) {
@@ -70,17 +95,23 @@ public class SocketController {
         System.out.println(reader.readLine());
     }
 
-    public int getWeight() throws IOException {
-        sendLine("S");
-        System.out.println(reader.readLine());
-        return 1;
-    }
-
     public void displayBigOnWeight(String text) throws IOException {
         sendLine("D " + text);
         System.out.println(reader.readLine());
         waitTimer(2);
         sendLine("DW");
+    }
+
+    public boolean isThisAnInt(char s) {
+        String intChecker = Character.toString(s);
+        try
+        {
+            Integer.parseInt(intChecker);
+            return true;
+        } catch (NumberFormatException ex)
+        {
+            return false;
+        }
     }
 
 }

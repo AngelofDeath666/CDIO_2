@@ -1,47 +1,64 @@
 import Controller.SocketController;
 
 import java.io.IOException;
-import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        new Main().run();
-    }
-
-    public void run() throws IOException {
-        String userName = "Anders_And";
         SocketController sc = new SocketController();
         sc.connectToServer("127.0.0.1",8000);
-        Scanner s = new Scanner(System.in);
+        new Main().run(sc);
+    }
+
+    public void run(SocketController sc) throws IOException {
+        String userName = "Anders And";
+        int userID;
         while(true) {
-            int userID = sc.getUserSelectionWithReturn("Indtast_operatør_ID:");
+            userID = sc.getUserSelectionWithIntReturn("Indtast operatør ID:");
             if (userID == 12) {
-                sc.getUserSelection(userName + "?");
-                operatorConfirmed(sc);
+                String nameConfirm = sc.getUserSelectionWithStringReturn("Er dit navn " + userName + "?");
+                if (nameConfirm.contains("JA") || nameConfirm.contains("Ja") || nameConfirm.contains("ja") || nameConfirm.contains("jA")) operatorConfirmed(sc);
             }
             else {
-                sc.displayOnWeight("Ukendt_operatør");
-                sc.displayOnWeight("Prøv_igen");
+                String tryAgain = sc.getUserSelectionWithStringReturn("Ukendt operatør ID. Vil du prøve igen?");
+                if (tryAgain.contains("JA") || tryAgain.contains("Ja") || tryAgain.contains("ja") || tryAgain.contains("jA")) continue;
+                else {
+                    System.exit(0);
+                }
             }
         }
     }
 
     public void operatorConfirmed(SocketController sc) throws IOException {
-        int batchNumber = sc.getUserSelectionWithReturn("Indtast_batch_nummer:");
-        sc.getUserSelection("Ubelast_vægt");
+        int expectedBatchNumber = 1234;
+        String batchType = "Salt";
+        while (true) {
+            int batchNumber = sc.getUserSelectionWithIntReturn("Indtast batch nummer:");
+            if (batchNumber == expectedBatchNumber) {
+                String correctBatch = sc.getUserSelectionWithStringReturn(expectedBatchNumber + " er " + batchType + ". Er det hvad du vil veje?");
+                if (correctBatch.contains("JA") || correctBatch.contains("Ja") || correctBatch.contains("ja") || correctBatch.contains("jA")) break;
+                else continue;
+            }
+            else {
+                String tryAgain = sc.getUserSelectionWithStringReturn("Ukendt batch nummer. Vil du prøve igen?");
+                if (tryAgain.contains("JA") || tryAgain.contains("Ja") || tryAgain.contains("ja") || tryAgain.contains("jA")) continue;
+                else {
+                    System.exit(0);
+                }
+            }
+        }
+        sc.getUserSelectionWithoutReturn("Fjern alt fra vægt");
         sc.resetWeight();
-        sc.getUserSelection("Placer_tara");
-        int taraWeight = sc.getWeight();
+        double taraWeight = sc.getUserSelectionDouble("Placer tara");
         sc.resetWeight();
-        sc.getUserSelection("Placer_netto");
-        int nettoWeight = sc.getWeight();
+        double nettoWeight = sc.getUserSelectionDouble("Placer netto");
         sc.resetWeight();
-        sc.getUserSelection("Fjern_brutto");
-        int bruttoWeight = sc.getWeight();
-        if (-bruttoWeight - taraWeight == nettoWeight) {
+        double bruttoWeight = sc.getUserSelectionDouble("Fjern brutto");
+        if (bruttoWeight - taraWeight <= nettoWeight+0.001 && bruttoWeight -taraWeight >= nettoWeight-0.001) {
             sc.displayBigOnWeight("OK");
         }
         else sc.displayBigOnWeight("KASSER");
+        sc.sendLine("Q");
+        System.exit(0);
     }
 }
